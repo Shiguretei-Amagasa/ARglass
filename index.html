@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebAR</title>
+
+  <script type="module"
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+    }
+
+    model-viewer {
+      width: 100vw;
+      height: 100vh;
+      touch-action: pan-y;
+    }
+
+    /* Safari UI 回避済みのARボタン */
+    .ar-button {
+      position: absolute;
+      bottom: 80px;
+      right: 16px;
+      padding: 12px 18px;
+      font-size: 14px;
+      border-radius: 20px;
+      border: none;
+      background: rgba(255,255,255,0.9);
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <model-viewer
+    src="AR_glass.glb"
+
+    ar
+    ar-modes="quick-look scene-viewer"
+
+    camera-controls
+    disable-zoom
+    disable-pan
+
+    ar-scale="fixed"
+    scale="0.1 0.1 0.1">
+
+    <button slot="ar-button" class="ar-button">
+      ARで表示
+    </button>
+
+  </model-viewer>
+</body>
+</html>
