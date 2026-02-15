@@ -51,9 +51,7 @@
       disable-pan
 
       ar-scale="fixed"
-      scale="0.1 0.1 0.1"
-
-      autoplay>
+      scale="0.1 0.1 0.1">
 
       <button slot="ar-button" class="ar-button">
         ARで表示
@@ -62,15 +60,46 @@
 
   <script>
     const model = document.querySelector('#model');
-    let isPlaying = true;
 
+    // GLB 内のアクション名を配列で順番に
+    const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
+    let current = 0;
+    let playing = true; // 自動再生中かどうか
+
+    // 次のアクションを再生する関数
+    function playNextAction() {
+      if (!model.model || !playing) return;
+
+      const animName = animations[current];
+      model.model.animationName = animName;
+      model.play();
+
+      // アクションの長さを取得して次へ
+      const duration = model.model.animations.find(a => a.name === animName).duration * 1000;
+
+      setTimeout(() => {
+        if (!playing) return;
+        current = (current + 1) % animations.length;
+        playNextAction();
+      }, duration);
+    }
+
+    // モデル読み込み時に自動再生開始
+    model.addEventListener('load', () => {
+      playNextAction();
+    });
+
+    // タップで再生／停止切替
     model.addEventListener('click', () => {
-      if (isPlaying) {
+      if (!model.model) return;
+
+      if (playing) {
         model.pause();
+        playing = false;
       } else {
-        model.play();
+        playing = true;
+        playNextAction();
       }
-      isPlaying = !isPlaying;
     });
   </script>
 </body>
