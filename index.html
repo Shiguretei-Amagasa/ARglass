@@ -14,6 +14,7 @@
     model-viewer {
       width: 100vw;
       height: 100vh;
+      touch-action: pan-y;
     }
     .ar-button {
       position: absolute;
@@ -27,49 +28,73 @@
       color: #000;
       font-weight: bold;
     }
-    #status {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: yellow;
-      padding: 20px;
-      font-size: 20px;
-      z-index: 9999;
-    }
   </style>
 </head>
 <body>
-  <div id="status">テスト中...</div>
-  
   <model-viewer
       id="model"
       src="AR_glass.glb"
       ar
       ar-modes="quick-look scene-viewer"
       camera-controls
+      disable-zoom
+      disable-pan
       ar-scale="fixed"
-      scale="0.1 0.1 0.1"
-      animation-name="Stage1"
-      autoplay>
+      scale="0.1 0.1 0.1">
       <button slot="ar-button" class="ar-button">ARで表示</button>
   </model-viewer>
 
   <script>
-    alert('JavaScriptが動作しています');
-    
-    const status = document.getElementById('status');
     const model = document.getElementById('model');
+    const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
+    let current = 0;
+    let playing = true;
     
-    status.textContent = 'スクリプト開始';
+    function playNextAction() {
+      if (!model.model || !playing) return;
+      
+      const animName = animations[current];
+      model.animationName = animName;
+      model.play();
+      
+      // GLBファイルから実際のアニメーションの長さを取得
+      const anim = model.model.animations.find(a => a.name === animName);
+      if (!anim) {
+        console.error('アニメーションが見つかりません:', animName);
+        return;
+      }
+      
+      const duration = anim.duration * 1000; // 秒をミリ秒に変換
+      console.log('再生中:', animName, '長さ:', duration, 'ms');
+      
+      setTimeout(() => {
+        if (!playing) return;
+        current = (current + 1) % animations.length;
+        playNextAction();
+      }, duration);
+    }
     
     model.addEventListener('load', function() {
-      status.textContent = 'モデル読み込み完了！';
-      alert('モデルが読み込まれました。利用可能なアニメーション: ' + model.availableAnimations);
+      console.log('利用可能なアニメーション:', model.availableAnimations);
+      
+      // 各アニメーションの長さを表示
+      model.model.animations.forEach(anim => {
+        console.log(anim.name + ': ' + anim.duration + '秒');
+      });
+      
+      playNextAction();
     });
     
-    model.addEventListener('error', function(e) {
-      status.textContent = 'エラー発生';
-      alert('エラー: ' + e);
+    // タップで再生/停止切替
+    model.addEventListener('click', function() {
+      if (!model.model) return;
+      if (playing) {
+        model.pause();
+        playing = false;
+      } else {
+        playing = true;
+        playNextAction();
+      }
     });
   </script>
 </body>
