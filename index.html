@@ -4,9 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AR_Glasss</title>
-  <script type="module"
-    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
-  </script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -16,7 +14,6 @@
     model-viewer {
       width: 100vw;
       height: 100vh;
-      touch-action: pan-y;
     }
     .ar-button {
       position: absolute;
@@ -30,67 +27,49 @@
       color: #000;
       font-weight: bold;
     }
+    #status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: yellow;
+      padding: 20px;
+      font-size: 20px;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
+  <div id="status">テスト中...</div>
+  
   <model-viewer
       id="model"
       src="AR_glass.glb"
       ar
       ar-modes="quick-look scene-viewer"
       camera-controls
-      disable-zoom
-      disable-pan
       ar-scale="fixed"
       scale="0.1 0.1 0.1"
+      animation-name="Stage1"
       autoplay>
-      <button slot="ar-button" class="ar-button">
-        ARで表示
-      </button>
+      <button slot="ar-button" class="ar-button">ARで表示</button>
   </model-viewer>
+
   <script>
-    const model = document.querySelector('#model');
-    const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
-    const durations = [3000, 3000, 3000, 3000];
-    let current = 0;
-    let playing = true;
-    let timeoutId = null;
+    alert('JavaScriptが動作しています');
     
-    function playNextAction() {
-      console.log('Playing animation:', animations[current]);
-      
-      if (!model.model || !playing) return;
-      
-      const animName = animations[current];
-      const currentDuration = durations[current];
-      
-      model.animationName = animName;
-      model.play();
-      
-      if (timeoutId) clearTimeout(timeoutId);
-      
-      timeoutId = setTimeout(() => {
-        if (!playing) return;
-        current = (current + 1) % animations.length;
-        playNextAction();
-      }, currentDuration);
-    }
+    const status = document.getElementById('status');
+    const model = document.getElementById('model');
     
-    model.addEventListener('load', () => {
-      console.log('Available animations:', model.availableAnimations);
-      setTimeout(() => playNextAction(), 100);
+    status.textContent = 'スクリプト開始';
+    
+    model.addEventListener('load', function() {
+      status.textContent = 'モデル読み込み完了！';
+      alert('モデルが読み込まれました。利用可能なアニメーション: ' + model.availableAnimations);
     });
     
-    model.addEventListener('click', () => {
-      if (!model.model) return;
-      if (playing) {
-        model.pause();
-        playing = false;
-        if (timeoutId) clearTimeout(timeoutId);
-      } else {
-        playing = true;
-        playNextAction();
-      }
+    model.addEventListener('error', function(e) {
+      status.textContent = 'エラー発生';
+      alert('エラー: ' + e);
     });
   </script>
 </body>
