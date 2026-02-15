@@ -18,7 +18,6 @@
       height: 100vh;
       touch-action: pan-y;
     }
-    /* Safari UI 回避済みのARボタン */
     .ar-button {
       position: absolute;
       bottom: 80px;
@@ -43,48 +42,51 @@
       disable-zoom
       disable-pan
       ar-scale="fixed"
-      scale="0.1 0.1 0.1">
+      scale="0.1 0.1 0.1"
+      autoplay>
       <button slot="ar-button" class="ar-button">
         ARで表示
       </button>
   </model-viewer>
   <script>
     const model = document.querySelector('#model');
-    // GLB 内のアクション名を配列で順番に
     const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
-    // 各アクションを表示する時間（ミリ秒）
-    const durations = [3000, 3000, 3000, 3000]; // 各3秒ずつ
+    const durations = [3000, 3000, 3000, 3000];
     let current = 0;
-    let playing = true; // 自動再生中かどうか
+    let playing = true;
+    let timeoutId = null;
     
-    // 次のアクションを再生する関数
     function playNextAction() {
-      if (!model.model || !playing) return;
-      const animName = animations[current];
-      const currentDuration = durations[current]; // ここで現在の時間を保存
+      console.log('Playing animation:', animations[current]);
       
-      model.model.animationName = animName;
+      if (!model.model || !playing) return;
+      
+      const animName = animations[current];
+      const currentDuration = durations[current];
+      
+      model.animationName = animName;
       model.play();
       
-      // 指定した時間後に次のアクションへ
-      setTimeout(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      timeoutId = setTimeout(() => {
         if (!playing) return;
         current = (current + 1) % animations.length;
         playNextAction();
-      }, currentDuration); // 保存した時間を使用
+      }, currentDuration);
     }
     
-    // モデル読み込み時に自動再生開始
     model.addEventListener('load', () => {
-      playNextAction();
+      console.log('Available animations:', model.availableAnimations);
+      setTimeout(() => playNextAction(), 100);
     });
     
-    // タップで再生／停止切替
     model.addEventListener('click', () => {
       if (!model.model) return;
       if (playing) {
         model.pause();
         playing = false;
+        if (timeoutId) clearTimeout(timeoutId);
       } else {
         playing = true;
         playNextAction();
