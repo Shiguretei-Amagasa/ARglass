@@ -61,6 +61,8 @@
     function playNextAction() {
       if (!model.model || !playing) return;
       const animName = animations[current];
+      const currentDuration = durations[current]; // ここで現在の時間を保存
+      
       model.model.animationName = animName;
       model.play();
       
@@ -69,7 +71,7 @@
         if (!playing) return;
         current = (current + 1) % animations.length;
         playNextAction();
-      }, durations[current]);
+      }, currentDuration); // 保存した時間を使用
     }
     
     // モデル読み込み時に自動再生開始
