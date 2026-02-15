@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WebAR</title>
+  <title>AR_Glasss</title>
 
   <script type="module"
     src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
@@ -40,22 +40,38 @@
 
 <body>
   <model-viewer
-    src="AR_glass.glb"
+      id="model"
+      src="AR_glass.glb"
 
-    ar
-    ar-modes="quick-look scene-viewer"
+      ar
+      ar-modes="quick-look scene-viewer"
 
-    camera-controls
-    disable-zoom
-    disable-pan
+      camera-controls
+      disable-zoom
+      disable-pan
 
-    ar-scale="fixed"
-    scale="0.1 0.1 0.1">
+      ar-scale="fixed"
+      scale="0.1 0.1 0.1"
 
-    <button slot="ar-button" class="ar-button">
-      ARで表示
-    </button>
+      autoplay>
 
+      <button slot="ar-button" class="ar-button">
+        ARで表示
+      </button>
   </model-viewer>
+
+  <script>
+    const model = document.querySelector('#model');
+    let isPlaying = true;
+
+    model.addEventListener('click', () => {
+      if (isPlaying) {
+        model.pause();
+      } else {
+        model.play();
+      }
+      isPlaying = !isPlaying;
+    });
+  </script>
 </body>
 </html>
