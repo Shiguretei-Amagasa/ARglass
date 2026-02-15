@@ -4,24 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AR_Glasss</title>
-
   <script type="module"
     src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
   </script>
-
   <style>
     body {
       margin: 0;
       background: #000;
       overflow: hidden;
     }
-
     model-viewer {
       width: 100vw;
       height: 100vh;
       touch-action: pan-y;
     }
-
     /* Safari UI 回避済みのARボタン */
     .ar-button {
       position: absolute;
@@ -37,62 +33,53 @@
     }
   </style>
 </head>
-
 <body>
   <model-viewer
       id="model"
       src="AR_glass.glb"
-
       ar
       ar-modes="quick-look scene-viewer"
-
       camera-controls
       disable-zoom
       disable-pan
-
       ar-scale="fixed"
       scale="0.1 0.1 0.1">
-
       <button slot="ar-button" class="ar-button">
         ARで表示
       </button>
   </model-viewer>
-
   <script>
     const model = document.querySelector('#model');
-
     // GLB 内のアクション名を配列で順番に
     const animations = ['logo_bottun', 'arm', '立方体.004', '立方体.006'];
+    // 各アクションを表示する時間（ミリ秒）
+    const durations = [3000, 3000, 3000, 3000]; // 各3秒ずつ
     let current = 0;
     let playing = true; // 自動再生中かどうか
-
+    
     // 次のアクションを再生する関数
     function playNextAction() {
       if (!model.model || !playing) return;
-
       const animName = animations[current];
       model.model.animationName = animName;
       model.play();
-
-      // アクションの長さを取得して次へ
-      const duration = model.model.animations.find(a => a.name === animName).duration * 1000;
-
+      
+      // 指定した時間後に次のアクションへ
       setTimeout(() => {
         if (!playing) return;
         current = (current + 1) % animations.length;
         playNextAction();
-      }, duration);
+      }, durations[current]);
     }
-
+    
     // モデル読み込み時に自動再生開始
     model.addEventListener('load', () => {
       playNextAction();
     });
-
+    
     // タップで再生／停止切替
     model.addEventListener('click', () => {
       if (!model.model) return;
-
       if (playing) {
         model.pause();
         playing = false;
