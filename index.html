@@ -14,6 +14,7 @@
     model-viewer {
       width: 100vw;
       height: 100vh;
+      touch-action: pan-y;
     }
     .ar-button {
       position: absolute;
@@ -27,24 +28,9 @@
       color: #000;
       font-weight: bold;
     }
-    #info {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.95);
-      padding: 15px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 14px;
-      max-width: 350px;
-      z-index: 9999;
-      line-height: 1.6;
-    }
   </style>
 </head>
 <body>
-  <div id="info">読み込み中...</div>
-  
   <model-viewer
       id="model"
       src="AR_glass.glb"
@@ -60,94 +46,44 @@
 
   <script>
     const model = document.getElementById('model');
-    const info = document.getElementById('info');
-    const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
-    let current = 0;
-    let playing = true;
-    let logLines = [];
-    
-    function addLog(msg) {
-      console.log(msg);
-      logLines.push(msg);
-      if (logLines.length > 15) logLines.shift();
-      info.innerHTML = logLines.join('<br>');
-    }
-    
-    function playNextAction() {
-      addLog('--- playNextAction呼び出し ---');
-      addLog('current: ' + current);
-      
-      if (!model.model) {
-        addLog('⚠️ model.modelが存在しません');
-        return;
-      }
-      
-      if (!playing) {
-        addLog('⚠️ playingがfalseです');
-        return;
-      }
-      
-      const animName = animations[current];
-      addLog('アニメーション名: ' + animName);
-      
-      model.animationName = animName;
-      model.play();
-      
-      // アニメーションの長さを取得（安全に）
-      let duration = 3000; // デフォルト3秒
-      
-      if (model.model && model.model.animations) {
-        const anim = model.model.animations.find(a => a.name === animName);
-        if (anim && anim.duration) {
-          duration = anim.duration * 1000;
-          addLog('▶️ 再生開始: ' + duration + 'ms');
-        } else {
-          addLog('⚠️ アニメーション情報なし、デフォルト使用');
-        }
-      } else {
-        addLog('⚠️ animations配列なし、デフォルト使用');
-      }
-      
-      setTimeout(() => {
-        addLog('⏰ タイムアウト発火');
-        if (!playing) {
-          addLog('⚠️ playing=false, 停止');
-          return;
-        }
-        current = (current + 1) % animations.length;
-        addLog('次へ移動: current=' + current);
-        playNextAction();
-      }, duration);
-    }
     
     model.addEventListener('load', function() {
-      addLog('✅ モデル読み込み完了');
-      addLog('availableAnimations: ' + model.availableAnimations);
+      console.log('✅ モデル読み込み完了');
+      console.log('利用可能なアニメーション:', model.availableAnimations);
       
-      // animations配列の確認
-      if (model.model && model.model.animations) {
-        addLog('animations配列が存在します');
-        model.model.animations.forEach(anim => {
-          addLog(anim.name + ': ' + anim.duration.toFixed(2) + '秒');
-        });
-      } else {
-        addLog('⚠️ animations配列が見つかりません');
+      // 全てのアニメーションを同時に再生
+      const animations = ['Stage1', 'Stage2', 'Stage3', 'Stage4'];
+      
+      // model-viewerは1つのアニメーションしか再生できないため、
+      // Three.jsのミキサーを直接操作します
+      if (model.model) {
+        const mixer = model.model[Object.getOwnPropertySymbols(model.model).find(s => s.description === 'mixer')];
+        
+        if (mixer) {
+          // 既存のアクションをクリア
+          mixer.stopAllAction();
+          
+          // 全てのアニメーションを同時に再生
+          animations.forEach(animName => {
+            const clip = model.model.animations.find(a => a.name === animName);
+            if (clip) {
+              const action = mixer.clipAction(clip);
+              action.play();
+              console.log('再生開始:', animName);
+            }
+          });
+        }
       }
-      
-      addLog('--- 再生開始 ---');
-      playNextAction();
     });
     
+    // タップで再生/停止切替
     model.addEventListener('click', function() {
-      if (!model.model) return;
-      if (playing) {
-        addLog('⏸️ 一時停止');
+      if (!model.paused) {
         model.pause();
-        playing = false;
+        console.log('⏸️ 一時停止');
       } else {
-        addLog('▶️ 再開');
-        playing = true;
-        playNextAction();
+        model.play();
+        console.log('▶️ 再開');
       }
     });
   </script>
