@@ -18,7 +18,6 @@
       height: 100vh;
       touch-action: pan-y;
     }
-    /* Safari UI 回避済みのARボタン */
     .ar-button {
       position: absolute;
       bottom: 80px;
@@ -31,9 +30,21 @@
       color: #000;
       font-weight: bold;
     }
+    #debug {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
+  <div id="debug">読み込み中...</div>
+  
   <model-viewer
       id="model"
       src="AR_glass.glb"
@@ -50,5 +61,16 @@
         ARで表示
       </button>
   </model-viewer>
+
+  <script>
+    const model = document.querySelector('#model');
+    const debug = document.querySelector('#debug');
+    
+    model.addEventListener('load', () => {
+      const anims = model.availableAnimations;
+      debug.textContent = '利用可能なアニメーション: ' + anims.join(', ');
+      console.log('利用可能なアニメーション:', anims);
+    });
+  </script>
 </body>
 </html>
