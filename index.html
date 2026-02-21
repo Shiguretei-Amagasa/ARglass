@@ -18,6 +18,7 @@
       height: 100vh;
       touch-action: pan-y;
     }
+    /* Safari UI 回避済みのARボタン */
     .ar-button {
       position: absolute;
       bottom: 80px;
@@ -43,18 +44,12 @@
       disable-pan
       ar-scale="fixed"
       scale="0.1 0.1 0.1"
+      animation-name="AllStages"
       autoplay
       loop>
       <button slot="ar-button" class="ar-button">
         ARで表示
       </button>
   </model-viewer>
-
-  <script>
-    const model = document.querySelector('#model');
-    model.addEventListener('load', () => {
-      console.log('利用可能なアニメーション:', model.availableAnimations);
-    });
-  </script>
 </body>
 </html>
